@@ -1,0 +1,94 @@
+{
+  "aca": {
+    "label": "Adult Children of Alcoholics online and telephone calendar",
+    "program": "aca",
+    "kind": "teamup",
+    "calendar": "kse84zjj5qb58oiren"
+  },
+  "slaa": {
+    "label": "SLAA virtual intergroup calendar",
+    "program": "slaa",
+    "kind": "teamup",
+    "calendar": "ksxi176ztzzuswm5pk"
+  },
+  "ea": {
+    "label": "Emotions Anonymous remote directory",
+    "program": "ea",
+    "kind": "gsheets",
+    "spreadsheet": "1hG3znpdpwYIl7OvAKntXlvf5cAeA1Ygees38sqRK_7I",
+    "gids": [
+      "864168168",
+      "553699434",
+      "878042136",
+      "1040393233",
+      "1746663359",
+      "55189020",
+      "476999213",
+      "72714761",
+      "1888883238"
+    ]
+  },
+  "ua": {
+    "label": "Underearners Anonymous world list",
+    "program": "ua",
+    "kind": "tsml",
+    "page": "https://underearnersanonymous.org/meetings/?tsml-day=any"
+  },
+  "arts": {
+    "label": "ARTS Anonymous master list",
+    "program": "arts",
+    "kind": "html",
+    "parser": "arts",
+    "page": "https://www.artsanonymous.org/newlist/master_list.html"
+  },
+  "ceahow": {
+    "label": "CEA-HOW Los Angeles directory, times stored as Eastern",
+    "program": "ceahow",
+    "kind": "html",
+    "parser": "ceahow",
+    "page": "https://lahow.org/meetings.html"
+  },
+  "dda": {
+    "label": "Dual Diagnosis Anonymous of Oregon, plus DDA UK in GMT",
+    "program": "dda",
+    "kind": "html",
+    "parser": "dda",
+    "page": "https://ddainc.org/online-dda-meetings/",
+    "page2": "https://www.ddauk.org/meetings/"
+  },
+  "faa": {
+    "label": "Food Addicts Anonymous virtual and phone lists, Eastern time",
+    "program": "faa",
+    "kind": "html",
+    "parser": "faa",
+    "page": "https://faacanhelp.org/meetings/virtual-meetings/",
+    "page2": "https://faacanhelp.org/meetings/phone-meetings/"
+  },
+  "aba": {
+    "label": "Anorexics and Bulimics Anonymous list, using each meeting's saved clock",
+    "program": "aba",
+    "kind": "html",
+    "parser": "aba",
+    "page": "https://www.aba12steps.org/meeting-info"
+  },
+  "recoveries": {
+    "label": "Recoveries Anonymous phone and Zoom meetings that publish a time",
+    "program": "recoveries",
+    "kind": "html",
+    "parser": "recoveries",
+    "page": "https://www.r-a.org/H_Meet.htm"
+  },
+  "eha": {
+    "label": "Emotional Health Anonymous in the San Gabriel Valley",
+    "program": "eha",
+    "kind": "html",
+    "parser": "eha",
+    "page": "https://www.emotionalhealthanonymous.org/meetings"
+  },
+  "coanon": {
+    "label": "Co-Anon region pages that publish a time and a Zoom id or a street",
+    "program": "coanon",
+    "kind": "html",
+    "parser": "coanon"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "url": "http://127.0.0.1:8080/",
+  "viewports": {
+    "desktop": {
+      "width": 1280,
+      "height": 800,
+      "status": 200,
+      "title": "NextMeeting",
+      "hasCanvas": false,
+      "bodyTextLen": 257,
+      "bodyTextHash": "f51ce1239de06230d4b24856530cbc7c50124b36b32e7a20fc4be794ae38ae0a",
+      "bodyTextPrefix": "Next Meeting ACA Add a Meeting Import CSV / Excel Printable Week",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview.png"
+    },
+    "mobile": {
+      "width": 390,
+      "height": 844,
+      "status": 200,
+      "title": "NextMeeting",
+      "hasCanvas": false,
+      "bodyTextLen": 257,
+      "bodyTextHash": "f51ce1239de06230d4b24856530cbc7c50124b36b32e7a20fc4be794ae38ae0a",
+      "bodyTextPrefix": "Next Meeting ACA Add a Meeting Import CSV / Excel Printable Week",
+      "horizontalOverflow": false,
+      "consoleErrors": [],
+      "pageErrors": [],
+      "screenshot": "/workspace/screenshots/app-builder-preview-mobile.png"
+    }
+  },
+  "brandWarnings": [],
+  "authWarnings": [],
+  "verdictFile": "/workspace/screenshots/app-builder-preview.json"
+}
