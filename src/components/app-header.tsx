@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Mail, Plus, Printer, Sun, Moon, Library, Settings } from "lucide-react";
+import { Plus, Printer, Sun, Moon, Library, Settings } from "lucide-react";
 import { useMeetingStore } from "@/lib/meetings/store";
 
 export function AppHeader({ embedded = false }: { embedded?: boolean }) {
@@ -98,20 +98,12 @@ export function AppHeader({ embedded = false }: { embedded?: boolean }) {
           />
           <Link to="/weekly" onClick={() => setNavOpen(false)} className="block">
             <span className="flex w-full items-center justify-between px-4">
-              <span className="flex w-full items-center justify-between border-b border-[var(--color-fg-3)]/30 px-2 py-4 text-[var(--color-fg)]">
+              <span className="flex w-full items-center justify-between px-2 py-4 text-[var(--color-fg)]">
                 Printable Weekly List
                 <Printer className="size-5 text-[var(--color-primary)]" />
               </span>
             </span>
           </Link>
-          <a href="mailto:feedback@nextmeeting.app" className="block">
-            <span className="flex w-full items-center justify-between px-4">
-              <span className="flex w-full items-center justify-between px-2 py-4 text-[var(--color-fg)]">
-                Send Feedback
-                <Mail className="size-5 text-[var(--color-primary)]" />
-              </span>
-            </span>
-          </a>
         </nav>
       </aside>
     </>

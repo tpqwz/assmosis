@@ -12,6 +12,7 @@ import {
 import { buildZoomAppUrl, copyDetailsText, copyText, formatMeetingId } from "@/lib/meetings/zoom";
 import { buildJoinUrl, joinHint } from "@/lib/meetings/platforms";
 import { programById, localizedProgram } from "@/lib/meetings/programs";
+import { meetingListSources } from "@/lib/meetings/list-sources";
 import { t } from "@/lib/meetings/i18n";
 import { TAG_KEYS, type MeetingTag } from "@/lib/meetings/tags";
 import { requestNotify } from "@/lib/meetings/alerts";
@@ -44,6 +45,7 @@ export function SessionDetails() {
   const program = programById(programs, meeting.programId || "aca");
   const shown = program ? localizedProgram(program, locale) : null;
   const group = groups.find((g) => g.id === meeting.groupId);
+  const sources = meetingListSources(meeting);
   const when = `Every ${formatLocalWeekday(next, zone, "long")} · ${formatLocalTime(next, zone)}`;
   const details = copyDetailsText(meeting, when, joinUrl);
 
@@ -214,6 +216,22 @@ export function SessionDetails() {
             <p className="opacity-60">No contact info provided.</p>
           )}
         </div>
+
+        {sources.length ? (
+          <div className="mx-6 mb-4">
+            <h4 className="mb-1 text-sm tracking-wide text-[var(--color-fg-2)] uppercase">Source</h4>
+            <ul className="flex flex-col gap-3">
+              {sources.map((source) => (
+                <li key={source.href}>
+                  <a href={source.href} target="_blank" rel="noreferrer" className="block text-[var(--color-primary)]">
+                    <span className="underline">{source.label}</span>
+                    <span className="mt-0.5 block text-sm break-all text-[var(--color-fg-3)]">{source.href}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
 
         <div className="mx-6 mb-8 flex flex-wrap gap-2">
           {meeting.source === "custom" ? (

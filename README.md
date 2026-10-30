@@ -37,9 +37,8 @@ What *was* carried over is a handful of names, left alone so a browser that alre
 | `src/lib/meetings/idb.ts` | IndexedDB name `nextmeeting` |
 | `src/components/import-export.tsx` | export filenames `nextmeeting-template` |
 | `src/components/session-details.tsx` | calendar id `@nextmeeting`, prodid `TheRooms` |
-| `src/components/app-header.tsx` | feedback mail goes to `feedback@nextmeeting.app` |
 
-See [NOTICE](NOTICE) for the full attribution. Renaming the storage keys would orphan saved meetings. The feedback address is still NextMeeting's; say if you want it pointed somewhere else.
+See [NOTICE](NOTICE) for the full attribution. Renaming the storage keys would orphan saved meetings. The menu used to include Send Feedback, which mailed `feedback@nextmeeting.app`. That item is gone.
 
 ## License
 

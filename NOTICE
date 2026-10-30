@@ -42,12 +42,12 @@ loading. They are labels, not copied code:
   src/components/session-details.tsx
                                 calendar UID host "@nextmeeting"
                                 calendar PRODID "-//TheRooms//EN"
-  src/components/app-header.tsx
-                                feedback mailto feedback@nextmeeting.app
 
-Menu labels such as "Add a Meeting", "Send Feedback", and "Printable Weekly
-List" follow the same jobs as that ACA page. The wording is ordinary, not a
-copied program.
+The menu used to include Send Feedback, aimed at feedback@nextmeeting.app.
+That is NextMeeting's address. The item has been removed.
+
+Menu labels such as "Add a Meeting" and "Printable Weekly List" follow the
+same jobs as that ACA page. The wording is ordinary, not a copied program.
 
 Third-party code
 ----------------

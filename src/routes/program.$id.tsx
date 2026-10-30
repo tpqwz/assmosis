@@ -4,6 +4,7 @@ import { ArrowLeft, Star } from "lucide-react";
 import { toast } from "sonner";
 import { catalogMeetings, useMeetingStore } from "@/lib/meetings/store";
 import { BUILTIN_PROGRAMS, LIST_SCOPE, programById } from "@/lib/meetings/programs";
+import { programListSources, programSourceLead } from "@/lib/meetings/list-sources";
 import { t } from "@/lib/meetings/i18n";
 import { KNOWN_QIDS, fetchDossier, shownProgram } from "@/lib/meetings/dossier";
 
@@ -75,6 +76,8 @@ function ProgramPage() {
   const shown = shownProgram(program, locale, dossier);
   const names = Object.entries(dossier?.labels || {}).filter(([lang]) => lang !== "en");
   const related = groups.filter((group) => group.programId === program.id);
+  const listSources = programListSources(program.id);
+  const sourceLead = programSourceLead(program.id);
 
   return (
     <div className="min-h-dvh bg-[var(--color-bg)] text-[var(--color-fg)]">
@@ -95,6 +98,21 @@ function ProgramPage() {
             {listed} {label("inThisList")}.{LIST_SCOPE[program.id] ? ` ${LIST_SCOPE[program.id]}` : ""}
           </p>
           {program.note ? <p className="mt-3 text-sm leading-relaxed text-[var(--color-fg-2)]">{program.note}</p> : null}
+          {sourceLead ? (
+            <div className="mt-3 text-sm leading-relaxed text-[var(--color-fg-2)]">
+              <p>{sourceLead}</p>
+              <ul className="mt-2 flex flex-col gap-3">
+                {listSources.sources.map((source) => (
+                  <li key={source.href}>
+                    <a href={source.href} target="_blank" rel="noreferrer" className="text-[var(--color-gold)]">
+                      <span className="underline">{source.label}</span>
+                      <span className="mt-0.5 block text-xs break-all text-[var(--color-fg-3)]">{source.href}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
           {dossier?.description ? <p className="mt-3 text-sm leading-relaxed">{dossier.description}</p> : null}
           <p className="mt-3 text-sm leading-relaxed text-[var(--color-fg-3)]">{label("aboutMeetings")}</p>
           <div className="mt-3 flex flex-col gap-1 text-sm">
