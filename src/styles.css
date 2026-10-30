@@ -129,6 +129,12 @@ html[data-font="atkinson"] {
     font-family: var(--font-sans);
     min-height: 100dvh;
   }
+  .shell-lead {
+    max-width: 36rem;
+    margin: 0;
+    padding: 1.5rem 1.25rem 0;
+    color: var(--color-fg-3);
+  }
   button:not(:disabled),
   [role="button"]:not(:disabled) {
     cursor: pointer;

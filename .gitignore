@@ -1,2 +1,20 @@
 node_modules
 restore-points
+
+# Generated output and sandbox scratch. Not source.
+.vercel
+.grok
+artifacts
+screenshots
+tools/__pycache__
+tools/*.com.dbg
+tools/*.aarch64.elf
+
+# Generated output and sandbox scratch. Not source.
+.vercel
+.grok
+artifacts
+screenshots
+tools/__pycache__
+tools/*.com.dbg
+tools/*.aarch64.elf

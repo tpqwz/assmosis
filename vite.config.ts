@@ -1,4 +1,4 @@
-import { readdirSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import type { Plugin } from "vite";
 import { defineConfig } from "vite";
@@ -142,6 +142,59 @@ function authPopupPlugin(): Plugin {
   };
 }
 
+const SHELL_PAGES = new Set(["/", "/index.html", "/settings", "/settings.html", "/weekly", "/weekly.html"]);
+
+/** Dev-only static shell. Production preview stays on the server-rendered app. */
+function shellLoaderPlugin(): Plugin {
+  return {
+    name: "assmosis:shell-loader",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        try {
+          const rawUrl = req.url ?? "";
+          const queryAt = rawUrl.indexOf("?");
+          const pathOnly = queryAt === -1 ? rawUrl : rawUrl.slice(0, queryAt);
+          const query = queryAt === -1 ? "" : rawUrl.slice(queryAt + 1);
+          if ((req.method ?? "GET").toUpperCase() !== "GET") {
+            next();
+            return;
+          }
+          const params = new URLSearchParams(query);
+          const install = params.get("install");
+          const platform = (params.get("platform") ?? "").toLowerCase();
+          if ((install === "1" || install === "true") && platform === "ios") {
+            next();
+            return;
+          }
+          const accept = String(req.headers.accept ?? "");
+          const wantsHtml = accept === "" || accept.includes("text/html") || accept.includes("*/*");
+          if (!wantsHtml) {
+            next();
+            return;
+          }
+          const isPage =
+            SHELL_PAGES.has(pathOnly) || pathOnly === "/program" || pathOnly.startsWith("/program/");
+          if (!isPage || (/\.[a-z0-9]+$/i.test(pathOnly) && !pathOnly.endsWith(".html"))) {
+            next();
+            return;
+          }
+          let html = readFileSync(join(server.config.root, "src/shell/loader.html"), "utf8");
+          html = html.replace('src="./boot.ts"', 'src="/src/shell/boot.ts"');
+          html = await server.transformIndexHtml(pathOnly || "/", html);
+          res.statusCode = 200;
+          res.setHeader("content-type", "text/html; charset=utf-8");
+          res.setHeader("cache-control", "no-cache");
+          res.end(html);
+        } catch (err) {
+          console.error("[assmosis] shell loader failed:", err);
+          if (!res.headersSent) next();
+        }
+      });
+    },
+  };
+}
+
 // `0.0.0.0:8080` is the live-preview contract — don't change host/port.
 // The dev server starts once `src/router.tsx` and `src/routes/` exist — see
 // AGENTS.md § "First scaffold".
@@ -165,6 +218,8 @@ export default defineConfig(({ command, isPreview }) => ({
     appEnvPlugin(),
     // PWA head + ?install=1 tutorial page; runs before Start/Nitro.
     grokPwaPlugin(),
+    // After the PWA wrapper so the injected head tags survive the shell HTML.
+    shellLoaderPlugin(),
     tailwindcss(),
     tanstackStart(),
     ...(command === "build" || isPreview

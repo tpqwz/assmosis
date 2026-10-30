@@ -7,6 +7,59 @@ import appCss from "../styles.css?url";
 
 const APP_NAME = "Assmosis";
 
+function ShellFrame() {
+  return (
+    <>
+      <PreviewHostBridge />
+      <AuthProvider>
+        <Outlet />
+        <ImportExport />
+        <Toaster
+          position="bottom-center"
+          toastOptions={{
+            className: "font-sans!",
+            style: {
+              background: "var(--color-fg-2)",
+              color: "white",
+              border: "none",
+              borderRadius: "50px",
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+              fontSize: "12px",
+              fontWeight: 700,
+            },
+          }}
+        />
+      </AuthProvider>
+    </>
+  );
+}
+
+function RootDocument() {
+  // Static hosts set data-shell on the document and mount the route tree
+  // inside #app. The server-rendered document must stay a full page so the
+  // client hydrates the same tree.
+  if (typeof document !== "undefined" && document.documentElement.dataset.shell === "wasm") {
+    return <ShellFrame />;
+  }
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <HeadContent />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("nextmeeting-theme");if(t==="dark"){document.documentElement.classList.add("dark","theme-dark");document.documentElement.style.colorScheme="dark"}var f=localStorage.getItem("nextmeeting-type");if(f){var p=JSON.parse(f);var ok={ledger:1,sans:1,plex:1,argon:1,neon:1,xenon:1,radon:1,atkinson:1};if(ok[p.font])document.documentElement.dataset.font=p.font;if(p.size==="s"||p.size==="l"||p.size==="xl")document.documentElement.dataset.size=p.size}}catch(e){}`,
+          }}
+        />
+      </head>
+      <body>
+        <ShellFrame />
+        <Scripts />
+      </body>
+    </html>
+  );
+}
+
 export const Route = createRootRoute({
   head: () => ({
     meta: [
@@ -28,40 +81,5 @@ export const Route = createRootRoute({
       { rel: "alternate", href: "/__grok/manifest.webmanifest" },
     ],
   }),
-  component: () => (
-    <html lang="en" suppressHydrationWarning>
-      <head>
-        <HeadContent />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("nextmeeting-theme");if(t==="dark"){document.documentElement.classList.add("dark","theme-dark");document.documentElement.style.colorScheme="dark"}var f=localStorage.getItem("nextmeeting-type");if(f){var p=JSON.parse(f);var ok={ledger:1,sans:1,plex:1,argon:1,neon:1,xenon:1,radon:1,atkinson:1};if(ok[p.font])document.documentElement.dataset.font=p.font;if(p.size==="s"||p.size==="l"||p.size==="xl")document.documentElement.dataset.size=p.size}}catch(e){}`,
-          }}
-        />
-      </head>
-      <body>
-        <PreviewHostBridge />
-        <AuthProvider>
-          <Outlet />
-          <ImportExport />
-          <Toaster
-            position="bottom-center"
-            toastOptions={{
-              className: "font-sans!",
-              style: {
-                background: "var(--color-fg-2)",
-                color: "white",
-                border: "none",
-                borderRadius: "50px",
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-                fontSize: "12px",
-                fontWeight: 700,
-              },
-            }}
-          />
-        </AuthProvider>
-        <Scripts />
-      </body>
-    </html>
-  ),
+  component: RootDocument,
 });

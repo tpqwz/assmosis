@@ -1,0 +1,68 @@
+Assmosis
+Copyright (c) 2026 tpqwz
+
+This repository is licensed under the MIT License (see LICENSE). That grant
+covers Assmosis's own code. It does not relicense anyone else's work, and it
+does not claim copyright over meeting listings published by fellowships.
+
+Inspiration
+-----------
+
+Assmosis started from the shape of NextMeeting's public ACA list:
+
+  https://nextmeeting.org/0BF67B1D-444F-45F5-BA5B-E3ADD7E4C30B.html
+
+That page was the reference for the product: a weekly meeting list, times
+shown in the viewer's zone, add a meeting, send feedback, and a printable
+week. "Template" overstates it. It was not a code template. No HTML, script,
+or stylesheet from that page, and no source from the NextMeeting project, is
+included here.
+
+The "Code on Github" link on that page points at DanielGuru/nextmeeting,
+which does not exist. The public project is:
+
+  https://github.com/NextMeeting/next-meeting-static-site
+
+That repository (gulp, Alpine.js, Tailwind) has no LICENSE file. Its code
+stays with its authors under whatever terms they set. Assmosis is not a fork
+of it. Alpine.js is not a dependency. A search of this tree does not contain
+that project's source.
+
+Names that still say nextmeeting
+---------------------------------
+
+A few identifiers were left in place so existing data on a device would keep
+loading. They are labels, not copied code:
+
+  src/lib/meetings/store.ts     localStorage "nextmeeting-aca-v1", "nextmeeting-theme"
+  src/lib/meetings/typeface.ts  localStorage "nextmeeting-type"
+  src/lib/meetings/idb.ts       IndexedDB database name "nextmeeting"
+  src/components/import-export.tsx
+                                downloaded filenames "nextmeeting-template"
+  src/components/session-details.tsx
+                                calendar UID host "@nextmeeting"
+                                calendar PRODID "-//TheRooms//EN"
+  src/components/app-header.tsx
+                                feedback mailto feedback@nextmeeting.app
+
+Menu labels such as "Add a Meeting", "Send Feedback", and "Printable Weekly
+List" follow the same jobs as that ACA page. The wording is ordinary, not a
+copied program.
+
+Third-party code
+----------------
+
+tools/vendor/cJSON.c and cJSON.h are the cJSON library, MIT licensed,
+copyright (c) 2009-2017 Dave Gamble and cJSON contributors. Their license
+notice is in those files and is not replaced by LICENSE in this repository.
+
+Other dependencies are installed from npm and keep their own licenses.
+They are not vendored into this tree (see package.json).
+
+Meeting data
+------------
+
+public/catalog/meetings.json and the JSON under src/data/ are schedules
+gathered from public fellowship lists. The listings belong to the groups
+and offices that published them. Assmosis is not affiliated with those
+fellowships, or with NextMeeting.

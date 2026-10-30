@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en" data-shell="wasm">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Assmosis</title>
+    <meta name="theme-color" content="#1C140E" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      try{var t=localStorage.getItem("nextmeeting-theme");if(t==="dark"){document.documentElement.classList.add("dark","theme-dark");document.documentElement.style.colorScheme="dark"}var f=localStorage.getItem("nextmeeting-type");if(f){var p=JSON.parse(f);var ok={ledger:1,sans:1,plex:1,argon:1,neon:1,xenon:1,radon:1,atkinson:1};if(ok[p.font])document.documentElement.dataset.font=p.font;if(p.size==="s"||p.size==="l"||p.size==="xl")document.documentElement.dataset.size=p.size}}catch(e){}
+    </script>
+  </head>
+  <body>
+    <main id="app"><p class="shell-lead">Meetings and groups across twelve-step programs. Your list stays on this device.</p></main>
+    <script type="module" src="./boot.ts"></script>
+  </body>
+</html>

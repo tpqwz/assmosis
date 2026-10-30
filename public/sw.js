@@ -1,9 +1,9 @@
-const CACHE = "assmosis-shell-v4";
+const CACHE = "assmosis-shell-v5";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE).then((cache) =>
-      Promise.all(["/", "/favicon.png", "/icon-192.png"].map((url) => cache.add(url).catch(() => undefined))),
+      Promise.all(["/", "/favicon.png", "/icon-192.png", "/shell.wasm"].map((url) => cache.add(url).catch(() => undefined))),
     ),
   );
   self.skipWaiting();
