@@ -1,9 +1,10 @@
 import { useLayoutEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Printer } from "lucide-react";
-import { useMeetingStore, useVisibleMeetings } from "@/lib/meetings/store";
+import { useMeetingStore, useVisibleMeetings, useShownZone } from "@/lib/meetings/store";
 import { registerOfflineShell } from "@/lib/meetings/idb";
-import { groupByWeekday, scheduleMeetings, formatLocalTime, viewerZone } from "@/lib/meetings/schedule";
+import { groupByWeekday, scheduleMeetings, formatLocalTime } from "@/lib/meetings/schedule";
+import { ZoneSheet } from "@/components/zone-sheet";
 import { formatMeetingId, buildZoomJoinUrl } from "@/lib/meetings/zoom";
 
 export const Route = createFileRoute("/weekly")({ component: WeeklyPage });
@@ -13,7 +14,8 @@ function WeeklyPage() {
   const hydrated = useMeetingStore((s) => s.hydrated);
   const now = useMeetingStore((s) => s.now);
   const meetings = useVisibleMeetings();
-  const zone = viewerZone();
+  const setZoneOpen = useMeetingStore((s) => s.setZoneOpen);
+  const zone = useShownZone();
 
   useLayoutEffect(() => {
     hydrate();
@@ -37,9 +39,14 @@ function WeeklyPage() {
 
       <main className="mx-auto max-w-3xl px-4 py-6">
         <p className="mb-6 text-center text-sm text-[var(--color-fg-3)] print:text-neutral-600">
-          {hydrated
-            ? `Times shown in ${zone.replace(/_/g, " ")} · ${scheduled.length} meetings`
-            : "Loading weekly list…"}
+          {hydrated ? (
+            <button type="button" className="underline decoration-[var(--color-border)] underline-offset-4" onClick={() => setZoneOpen(true)}>
+              Times shown in {zone.replace(/_/g, " ")}
+            </button>
+          ) : (
+            "Loading weekly list…"
+          )}
+          {hydrated ? ` · ${scheduled.length} meetings` : ""}
         </p>
         {hydrated
           ? days.map((day) => (
@@ -80,6 +87,7 @@ function WeeklyPage() {
             ))
           : null}
       </main>
+      <ZoneSheet />
     </div>
   );
 }

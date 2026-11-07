@@ -136,12 +136,22 @@ export function nextOccurrence(
   return u;
 }
 
-export function viewerZone(): string {
+export function deviceZone(): string {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   } catch {
     return "UTC";
   }
+}
+
+/** The list's clock. An empty choice follows the device. A meeting's own zone is separate. */
+export function shownZone(chosen = ""): string {
+  if (chosen && isValidZone(chosen)) return chosen;
+  return deviceZone();
+}
+
+export function viewerZone(): string {
+  return deviceZone();
 }
 
 export function formatLocalTime(ms: number, zone?: string) {

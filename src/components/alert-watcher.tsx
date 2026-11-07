@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { useMeetingStore } from "@/lib/meetings/store";
-import { scheduleMeetings, viewerZone } from "@/lib/meetings/schedule";
+import { scheduleMeetings, shownZone } from "@/lib/meetings/schedule";
 import { claimReminder, showNotification } from "@/lib/meetings/alerts";
+import { listExpired } from "@/lib/meetings/list-window";
 import type { ScheduledMeeting } from "@/lib/meetings/types";
 
 export function AlertWatcher() {
@@ -17,6 +18,8 @@ export function AlertWatcher() {
   const custom = useMeetingStore((s) => s.custom);
   const hiddenIds = useMeetingStore((s) => s.hiddenIds);
   const showCatalog = useMeetingStore((s) => s.showCatalog);
+  const showExpired = useMeetingStore((s) => s.showExpired);
+  const displayZone = useMeetingStore((s) => s.displayZone);
 
   useEffect(() => {
     if (!hydrated || !alertsEnabled) return;
@@ -24,6 +27,7 @@ export function AlertWatcher() {
     if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
     const state = useMeetingStore.getState();
     const wanted = state.allMeetings().filter((meeting) => {
+      if (!showExpired && listExpired(meeting)) return false;
       if (alertIds.includes(meeting.id)) return true;
       if (!alertFavorites) return false;
       return (
@@ -33,7 +37,7 @@ export function AlertWatcher() {
       );
     });
     if (!wanted.length) return;
-    const scheduled = scheduleMeetings(wanted, Date.now(), viewerZone());
+    const scheduled = scheduleMeetings(wanted, Date.now(), shownZone(displayZone));
     const leadMs = lead * 60_000;
     const due = scheduled.filter((meeting) => {
       const delta = meeting.nextOccurrence - Date.now();
@@ -67,6 +71,8 @@ export function AlertWatcher() {
     custom,
     hiddenIds,
     showCatalog,
+    showExpired,
+    displayZone,
   ]);
 
   return null;

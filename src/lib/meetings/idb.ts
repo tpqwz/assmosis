@@ -26,6 +26,8 @@ export type StoredUser = {
   localeChosen?: boolean;
   languageFollowsApp?: boolean;
   alertFavorites?: boolean;
+  showExpired?: boolean;
+  displayZone?: string;
   dossiers?: Record<string, Dossier>;
   filters?: Filters;
   savedAt?: number;

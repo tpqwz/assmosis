@@ -1,18 +1,18 @@
 import { CalendarPlus, Copy, Pencil, Trash2, MonitorPlay, X, Bell, Star } from "lucide-react";
 import { toast } from "sonner";
-import { useMeetingStore } from "@/lib/meetings/store";
+import { useMeetingStore, useShownZone } from "@/lib/meetings/store";
 import {
   formatLocalTime,
   formatLocalWeekday,
   nextOccurrence,
   relativePhrase,
-  viewerZone,
   weekdayLong,
 } from "@/lib/meetings/schedule";
 import { buildZoomAppUrl, copyDetailsText, copyText, formatMeetingId } from "@/lib/meetings/zoom";
 import { buildJoinUrl, joinHint } from "@/lib/meetings/platforms";
 import { programById, localizedProgram } from "@/lib/meetings/programs";
-import { meetingListSources } from "@/lib/meetings/list-sources";
+import { meetingListSources, missingPageSentence } from "@/lib/meetings/list-sources";
+import { copySentence, listExpired, listWindow } from "@/lib/meetings/list-window";
 import { t } from "@/lib/meetings/i18n";
 import { TAG_KEYS, type MeetingTag } from "@/lib/meetings/tags";
 import { requestNotify } from "@/lib/meetings/alerts";
@@ -34,10 +34,9 @@ export function SessionDetails() {
   const toggleAlert = useMeetingStore((s) => s.toggleAlert);
   const toggleFavorite = useMeetingStore((s) => s.toggleFavoriteMeeting);
   const setAlertsEnabled = useMeetingStore((s) => s.setAlertsEnabled);
+  const zone = useShownZone();
 
   if (!selectedId || !meeting) return null;
-
-  const zone = viewerZone();
   const next = nextOccurrence(meeting, now) ?? now;
   const isLive = next <= now;
   const joinUrl = buildJoinUrl(meeting);
@@ -46,6 +45,9 @@ export function SessionDetails() {
   const shown = program ? localizedProgram(program, locale) : null;
   const group = groups.find((g) => g.id === meeting.groupId);
   const sources = meetingListSources(meeting);
+  const copied = copySentence(meeting, now);
+  const noPage = missingPageSentence(meeting);
+  const expiredWindow = listExpired(meeting, now) ? listWindow(meeting) : null;
   const when = `Every ${formatLocalWeekday(next, zone, "long")} · ${formatLocalTime(next, zone)}`;
   const details = copyDetailsText(meeting, when, joinUrl);
 
@@ -86,6 +88,7 @@ export function SessionDetails() {
               </span>
             ) : null}
             {meeting.source === "custom" ? <span className="badge-mine mr-2">{t(locale, "mine")}</span> : null}
+            {expiredWindow ? <span className="badge-program mr-2">Expired</span> : null}
             {shown ? <span className="badge-program mr-2">{shown.short}</span> : null}
             {(meeting.tags || []).map((tag) => (
               <span key={tag} className="badge-program mr-2">
@@ -108,7 +111,7 @@ export function SessionDetails() {
             Every {formatLocalWeekday(next, zone, "long")} · {formatLocalTime(next, zone)}
           </div>
           <div className="mt-1 text-xs text-[var(--color-fg-3)]">
-            {weekdayLong(meeting.weekday)} {meeting.hour.toString().padStart(2, "0")}:
+            Saved as {weekdayLong(meeting.weekday)} {meeting.hour.toString().padStart(2, "0")}:
             {meeting.minute.toString().padStart(2, "0")} {meeting.zone.replace(/_/g, " ")} · {meeting.durationMinutes} min
           </div>
           {meeting.language || meeting.location ? (
@@ -217,19 +220,25 @@ export function SessionDetails() {
           )}
         </div>
 
-        {sources.length ? (
+        {meeting.source === "catalog" ? (
           <div className="mx-6 mb-4">
             <h4 className="mb-1 text-sm tracking-wide text-[var(--color-fg-2)] uppercase">Source</h4>
-            <ul className="flex flex-col gap-3">
-              {sources.map((source) => (
-                <li key={source.href}>
-                  <a href={source.href} target="_blank" rel="noreferrer" className="block text-[var(--color-primary)]">
-                    <span className="underline">{source.label}</span>
-                    <span className="mt-0.5 block text-sm break-all text-[var(--color-fg-3)]">{source.href}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+            {copied ? <p className="text-[15px] leading-relaxed">{copied}</p> : null}
+            {sources.length ? (
+              <ul className="mt-3 flex flex-col gap-3">
+                {sources.map((source) => (
+                  <li key={source.href}>
+                    <a href={source.href} target="_blank" rel="noreferrer" className="block text-[var(--color-primary)]">
+                      <span className="underline">{source.label}</span>
+                      {source.detail ? <span className="mt-0.5 block text-sm leading-relaxed text-[var(--color-fg-2)]">{source.detail}</span> : null}
+                      <span className="mt-0.5 block text-sm break-all text-[var(--color-fg-3)]">{source.href}</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : noPage ? (
+              <p className="mt-1 text-[15px] leading-relaxed">{noPage}</p>
+            ) : null}
           </div>
         ) : null}
 

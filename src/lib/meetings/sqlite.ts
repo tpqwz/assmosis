@@ -221,7 +221,7 @@ export function applyRecord(db: SqlDatabase, record: StoredUser) {
     } catch {
       /* column already present */
     }
-    for (const column of ["font TEXT", "text_size TEXT"]) {
+    for (const column of ["font TEXT", "text_size TEXT", "show_expired INTEGER", "display_zone TEXT"]) {
       try {
         db.run(`ALTER TABLE prefs ADD COLUMN ${column}`);
       } catch {
@@ -243,8 +243,8 @@ export function applyRecord(db: SqlDatabase, record: StoredUser) {
     db.run(
       `INSERT INTO prefs (
         id, theme, show_catalog, alert_lead, alerts_enabled, bar_place, card_size, filters, saved_at, locale,
-        locale_chosen, language_follows, alert_favorites, font, text_size
-      ) VALUES (1,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+        locale_chosen, language_follows, alert_favorites, font, text_size, show_expired, display_zone
+      ) VALUES (1,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
       [
         record.theme === "dark" ? "dark" : "light",
         record.showCatalog === false ? 0 : 1,
@@ -260,6 +260,8 @@ export function applyRecord(db: SqlDatabase, record: StoredUser) {
         record.alertFavorites ? 1 : 0,
         text(record.fontId || "deco"),
         text(record.textSize || "m"),
+        record.showExpired ? 1 : 0,
+        text(record.displayZone || ""),
       ],
     );
     db.run("COMMIT");
@@ -337,6 +339,8 @@ export function readRecord(db: SqlDatabase): StoredUser | null {
     localeChosen: Number(pref.locale_chosen) === 1,
     languageFollowsApp: pref.language_follows == null || Number(pref.language_follows) !== 0,
     alertFavorites: Number(pref.alert_favorites) === 1,
+    showExpired: Number(pref.show_expired) === 1,
+    displayZone: text(pref.display_zone),
     dossiers: Object.fromEntries(
       rows(db, "SELECT program_id, payload FROM dossiers").flatMap((row) => {
         try {
@@ -374,7 +378,7 @@ async function openDatabase(): Promise<SqlDatabase> {
   } catch {
     /* already there, or prefs does not exist yet */
   }
-  for (const column of ["locale_chosen INTEGER", "language_follows INTEGER", "alert_favorites INTEGER", "font TEXT", "text_size TEXT"]) {
+  for (const column of ["locale_chosen INTEGER", "language_follows INTEGER", "alert_favorites INTEGER", "font TEXT", "text_size TEXT", "show_expired INTEGER", "display_zone TEXT"]) {
     try {
       db.run(`ALTER TABLE prefs ADD COLUMN ${column}`);
     } catch {

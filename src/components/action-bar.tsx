@@ -1,9 +1,9 @@
 import { Search, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useMeetingStore, useVisibleMeetings, catalogMeetings, filterMeetings } from "@/lib/meetings/store";
+import { useMeetingStore, useVisibleMeetings, useShownZone, catalogMeetings, filterMeetings } from "@/lib/meetings/store";
 import { WEEKDAYS } from "@/lib/meetings/types";
-import { viewerZone } from "@/lib/meetings/schedule";
 import { PLATFORMS } from "@/lib/meetings/platforms";
+import { listExpired } from "@/lib/meetings/list-window";
 import { BUILTIN_PROGRAMS, LIST_SCOPE, localizedProgram } from "@/lib/meetings/programs";
 import { t } from "@/lib/meetings/i18n";
 import { TAGS, TAG_KEYS } from "@/lib/meetings/tags";
@@ -21,14 +21,16 @@ export function ActionBar() {
   const favoritePrograms = useMeetingStore((s) => s.favoriteProgramIds);
   const favoriteGroups = useMeetingStore((s) => s.favoriteGroupIds);
   const showCatalog = useMeetingStore((s) => s.showCatalog);
+  const showExpired = useMeetingStore((s) => s.showExpired);
   const catalogReady = useMeetingStore((s) => s.catalogReady);
   const visible = useVisibleMeetings();
   const hydrated = useMeetingStore((s) => s.hydrated);
+  const setZoneOpen = useMeetingStore((s) => s.setZoneOpen);
   const barPlace = useMeetingStore((s) => s.barPlace);
   const locale = useMeetingStore((s) => s.locale);
   const label = (key: string) => t(locale, key);
   const docked = barPlace === "bottom";
-  const zone = hydrated ? viewerZone() : "";
+  const zone = useShownZone();
   const programs = useMemo(() => [...BUILTIN_PROGRAMS, ...customPrograms], [customPrograms]);
   const [sheet, setSheet] = useState<"programs" | "languages" | "locations" | "ways" | null>(null);
   const filtering = Boolean(
@@ -82,11 +84,12 @@ export function ActionBar() {
       ...customMeetings,
     ];
     for (const meeting of list) {
+      if (!showExpired && listExpired(meeting)) continue;
       const id = meeting.programId || "aca";
       counts.set(id, (counts.get(id) || 0) + 1);
     }
     return counts;
-  }, [catalogReady, customMeetings, hiddenIds, showCatalog]);
+  }, [catalogReady, customMeetings, hiddenIds, showCatalog, showExpired]);
   const tagOptions = useMemo(() => {
     const list = [
       ...(showCatalog ? catalogMeetings().filter((m) => !hiddenIds.includes(m.id)) : []),
@@ -96,10 +99,11 @@ export function ActionBar() {
       list,
       { ...filters, tags: [], q: "" },
       Date.now(),
-      viewerZone(),
+      zone,
       programs,
       [],
       { meetings: favoriteMeetings, programs: favoritePrograms, groups: favoriteGroups },
+      showExpired,
     );
     const present = new Set(pool.flatMap((m) => m.tags || []));
     for (const id of filters.tags) present.add(id);
@@ -130,7 +134,9 @@ export function ActionBar() {
     locale,
     programs,
     showCatalog,
+    showExpired,
     catalogReady,
+    zone,
   ]);
 
   return (
@@ -242,10 +248,14 @@ export function ActionBar() {
                 </>
               ) : null}
             </div>
-            {zone ? (
-              <span className="shrink-0 text-[11px] tracking-wide">
-                <b className="text-[var(--color-fg-2)]">{zone.replace(/_/g, " ")}</b>
-              </span>
+            {hydrated ? (
+              <button
+                type="button"
+                className="shrink-0 px-1 py-1 text-left text-[11px] tracking-wide underline decoration-[var(--color-border)] underline-offset-4"
+                onClick={() => setZoneOpen(true)}
+              >
+                Times in <b className="text-[var(--color-fg-2)]">{zone.replace(/_/g, " ")}</b>
+              </button>
             ) : null}
           </div>
           {filtering && filters.programs.length === 1 && LIST_SCOPE[filters.programs[0]] ? (

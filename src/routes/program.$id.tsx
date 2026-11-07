@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { catalogMeetings, useMeetingStore } from "@/lib/meetings/store";
 import { BUILTIN_PROGRAMS, LIST_SCOPE, programById } from "@/lib/meetings/programs";
 import { programListSources, programSourceLead } from "@/lib/meetings/list-sources";
+import { listExpired, programWindows, windowPassed } from "@/lib/meetings/list-window";
 import { t } from "@/lib/meetings/i18n";
 import { KNOWN_QIDS, fetchDossier, shownProgram } from "@/lib/meetings/dossier";
 
@@ -20,6 +21,7 @@ function ProgramPage() {
   const customMeetings = useMeetingStore((s) => s.custom);
   const hiddenIds = useMeetingStore((s) => s.hiddenIds);
   const showCatalog = useMeetingStore((s) => s.showCatalog);
+  const showExpired = useMeetingStore((s) => s.showExpired);
   const catalogReady = useMeetingStore((s) => s.catalogReady);
   const hydrate = useMeetingStore((s) => s.hydrate);
   const dossier = useMeetingStore((s) => s.dossiers[id]);
@@ -36,8 +38,13 @@ function ProgramPage() {
   const listed = useMemo(() => {
     if (!program) return 0;
     const catalog = showCatalog ? catalogMeetings().filter((meeting) => !hiddenIds.includes(meeting.id)) : [];
-    return [...catalog, ...customMeetings].filter((meeting) => (meeting.programId || "aca") === program.id).length;
-  }, [catalogReady, customMeetings, hiddenIds, program, showCatalog]);
+    return [...catalog, ...customMeetings].filter((meeting) => {
+      if ((meeting.programId || "aca") !== program.id) return false;
+      if (!showExpired && listExpired(meeting)) return false;
+      return true;
+    }).length;
+  }, [catalogReady, customMeetings, hiddenIds, program, showCatalog, showExpired]);
+  const passed = program ? programWindows(program.id).filter((window) => windowPassed(window.through)) : [];
   const [busy, setBusy] = useState(false);
 
   async function update() {
@@ -97,6 +104,13 @@ function ProgramPage() {
           <p className="mt-3 text-sm leading-relaxed text-[var(--color-fg-2)]">
             {listed} {label("inThisList")}.{LIST_SCOPE[program.id] ? ` ${LIST_SCOPE[program.id]}` : ""}
           </p>
+          {passed.length > 0 && !showExpired ? (
+            <p className="mt-3 text-sm leading-relaxed text-[var(--color-fg-2)]">
+              {passed.length === 1
+                ? `The copy from ${passed[0].label} stays off this count until Settings is set to show expired lists.`
+                : `Copies from ${passed.map((window) => window.label).join(" and ")} stay off this count until Settings is set to show expired lists.`}
+            </p>
+          ) : null}
           {program.note ? <p className="mt-3 text-sm leading-relaxed text-[var(--color-fg-2)]">{program.note}</p> : null}
           {sourceLead ? (
             <div className="mt-3 text-sm leading-relaxed text-[var(--color-fg-2)]">
@@ -106,6 +120,7 @@ function ProgramPage() {
                   <li key={source.href}>
                     <a href={source.href} target="_blank" rel="noreferrer" className="text-[var(--color-gold)]">
                       <span className="underline">{source.label}</span>
+                      {source.detail ? <span className="mt-0.5 block text-sm leading-relaxed text-[var(--color-fg-2)]">{source.detail}</span> : null}
                       <span className="mt-0.5 block text-xs break-all text-[var(--color-fg-3)]">{source.href}</span>
                     </a>
                   </li>

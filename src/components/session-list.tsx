@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
-import { useMeetingStore, useVisibleMeetings } from "@/lib/meetings/store";
-import { groupByCategory, scheduleMeetings, viewerZone } from "@/lib/meetings/schedule";
+import { useMeetingStore, useVisibleMeetings, useShownZone } from "@/lib/meetings/store";
+import { groupByCategory, scheduleMeetings } from "@/lib/meetings/schedule";
 import { haversineKm } from "@/lib/meetings/places";
 import { t } from "@/lib/meetings/i18n";
 import { SessionCard } from "./session-card";
@@ -13,7 +13,8 @@ export function SessionList() {
   const filters = useMeetingStore((s) => s.filters);
   const locale = useMeetingStore((s) => s.locale);
   const customOnly = filters.source === "custom";
-  const scheduled = scheduleMeetings(meetings, now, viewerZone());
+  const zone = useShownZone();
+  const scheduled = scheduleMeetings(meetings, now, zone);
   if (filters.originLat != null && filters.originLng != null) {
     const lat = filters.originLat;
     const lng = filters.originLng;

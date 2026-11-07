@@ -9,6 +9,7 @@ import { SessionDetails } from "@/components/session-details";
 import { MeetingForm } from "@/components/meeting-form";
 import { ProgramsSheet } from "@/components/programs-sheet";
 import { AlertWatcher } from "@/components/alert-watcher";
+import { ZoneSheet } from "@/components/zone-sheet";
 import { InstallNotice } from "@/components/install-notice";
 import "@/lib/pwa";
 
@@ -39,6 +40,7 @@ function Home() {
         useMeetingStore.getState().setImportOpen(false);
         useMeetingStore.getState().setListsOpen(false);
         useMeetingStore.getState().setNavOpen(false);
+        useMeetingStore.getState().setZoneOpen(false);
       }
     }
     window.addEventListener("keydown", onKey);
@@ -75,6 +77,7 @@ function Home() {
       <MeetingForm />
       <ProgramsSheet />
       <AlertWatcher />
+      <ZoneSheet />
       <InstallNotice />
     </div>
   );

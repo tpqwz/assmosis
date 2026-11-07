@@ -3,7 +3,7 @@ import { create } from "zustand";
 import type { Filters, FellowshipGroup, Meeting, MeetingDraft, Platform, Gender } from "./types";
 import { EMPTY_FILTERS } from "./types";
 import { uid } from "@/lib/utils";
-import { viewerZone, nextOccurrence } from "./schedule";
+import { shownZone, isValidZone, nextOccurrence } from "./schedule";
 import { buildJoinUrl, passcodeMissing, PLATFORMS } from "./platforms";
 import { areaId, haversineKm, placeParts } from "./places";
 import { BUILTIN_PROGRAMS, type Program } from "./programs";
@@ -12,6 +12,7 @@ import { aliasHaystack, meetingLanguage, normalizeLocale, systemLocale, type Loc
 import { isDossier, type Dossier } from "./dossier";
 import { idbGet, idbSet, type StoredUser } from "./idb";
 import { readSqliteUser, writeSqliteUser } from "./sqlite";
+import { listExpired } from "./list-window";
 import { CATALOG_VERSION } from "./catalog-version";
 import { applyTypeface, normalizeFont, normalizeTextSize, type FontId, type TextSize } from "./typeface";
 
@@ -108,6 +109,8 @@ type Persisted = {
   localeChosen: boolean;
   languageFollowsApp: boolean;
   alertFavorites: boolean;
+  showExpired: boolean;
+  displayZone: string;
   dossiers: Record<string, Dossier>;
   filters: Filters;
 };
@@ -119,6 +122,7 @@ type UiState = {
   importOpen: boolean;
   listsOpen: boolean;
   navOpen: boolean;
+  zoneOpen: boolean;
   now: number;
   hydrated: boolean;
   catalogReady: boolean;
@@ -162,6 +166,9 @@ type MeetingState = Persisted &
     setTextSize: (size: string) => void;
     setLocale: (locale: string) => void;
     setAlertFavorites: (on: boolean) => void;
+    setShowExpired: (on: boolean) => void;
+    setDisplayZone: (zone: string) => void;
+    setZoneOpen: (open: boolean) => void;
     setDossier: (dossier: Dossier) => void;
     allPrograms: () => Program[];
     allMeetings: () => Meeting[];
@@ -190,6 +197,8 @@ function emptyPersisted(): Persisted {
     localeChosen: false,
     languageFollowsApp: true,
     alertFavorites: false,
+    showExpired: false,
+    displayZone: "",
     dossiers: {},
     filters: { ...EMPTY_FILTERS },
   };
@@ -274,6 +283,8 @@ function persistedFrom(record: StoredUser): Persisted {
     localeChosen: record.localeChosen === true,
     languageFollowsApp,
     alertFavorites: record.alertFavorites === true,
+    showExpired: record.showExpired === true,
+    displayZone: typeof record.displayZone === "string" && isValidZone(record.displayZone) ? record.displayZone : "",
     dossiers: normalizeDossiers(record.dossiers),
     filters: languageFollowsApp ? { ...filters, languages: name ? [name] : [] } : filters,
   };
@@ -370,6 +381,8 @@ function persist(state: Persisted & { theme: ThemeMode }) {
     localeChosen: state.localeChosen,
     languageFollowsApp: state.languageFollowsApp,
     alertFavorites: state.alertFavorites,
+    showExpired: state.showExpired,
+    displayZone: state.displayZone,
     dossiers: state.dossiers,
     filters: state.filters,
     savedAt: Date.now(),
@@ -565,6 +578,8 @@ export const useMeetingStore = create<MeetingState>((set, get) => ({
   localeChosen: false,
   languageFollowsApp: true,
   alertFavorites: false,
+  showExpired: false,
+  displayZone: "",
   dossiers: {},
   theme: "light",
   selectedId: null,
@@ -573,6 +588,7 @@ export const useMeetingStore = create<MeetingState>((set, get) => ({
   importOpen: false,
   listsOpen: false,
   navOpen: false,
+  zoneOpen: false,
   filters: {
     ...EMPTY_FILTERS,
     languages: meetingLanguage(systemLocale()) ? [meetingLanguage(systemLocale())] : [],
@@ -615,6 +631,8 @@ export const useMeetingStore = create<MeetingState>((set, get) => ({
           languageFollowsApp:
             current.languageFollowsApp !== start.languageFollowsApp ? current.languageFollowsApp : saved.languageFollowsApp,
           alertFavorites: current.alertFavorites !== start.alertFavorites ? current.alertFavorites : saved.alertFavorites,
+          showExpired: current.showExpired !== start.showExpired ? current.showExpired : saved.showExpired,
+          displayZone: current.displayZone !== start.displayZone ? current.displayZone : saved.displayZone,
           dossiers: current.dossiers !== start.dossiers ? current.dossiers : saved.dossiers,
           filters: current.filters !== start.filters ? current.filters : saved.filters,
           theme: current.theme !== start.theme ? current.theme : theme,
@@ -634,6 +652,7 @@ export const useMeetingStore = create<MeetingState>((set, get) => ({
           next.locale !== saved.locale ||
           next.dossiers !== saved.dossiers ||
           next.filters !== saved.filters ||
+          next.displayZone !== saved.displayZone ||
           next.theme !== theme;
         if (edited) persist(get());
       } catch {
@@ -879,6 +898,15 @@ export const useMeetingStore = create<MeetingState>((set, get) => ({
     set({ alertFavorites });
     persist(get());
   },
+  setShowExpired: (showExpired) => {
+    set({ showExpired });
+    persist(get());
+  },
+  setDisplayZone: (zone) => {
+    set({ displayZone: zone && isValidZone(zone) ? zone : "" });
+    persist(get());
+  },
+  setZoneOpen: (zoneOpen) => set({ zoneOpen }),
   setDossier: (dossier) => {
     if (!dossier.programId) return;
     set({ dossiers: { ...get().dossiers, [dossier.programId]: dossier } });
@@ -887,15 +915,16 @@ export const useMeetingStore = create<MeetingState>((set, get) => ({
   allPrograms: () => [...BUILTIN_PROGRAMS, ...get().programs],
   allMeetings: () => collectMeetings(get().custom, get().hiddenIds, get().showCatalog),
   visibleMeetings: () => {
-    const { filters, now, groups, favoriteMeetingIds, favoriteProgramIds, favoriteGroupIds } = get();
+    const { filters, now, groups, favoriteMeetingIds, favoriteProgramIds, favoriteGroupIds, showExpired, displayZone } = get();
     return filterMeetings(
       get().allMeetings(),
       filters,
       now,
-      viewerZone(),
+      shownZone(displayZone),
       get().allPrograms(),
       groups,
       { meetings: favoriteMeetingIds, programs: favoriteProgramIds, groups: favoriteGroupIds },
+      showExpired,
     );
   },
   getMeeting: (id) => {
@@ -920,6 +949,7 @@ export function filterMeetings(
   programs: Program[] = BUILTIN_PROGRAMS,
   groups: FellowshipGroup[] = [],
   favorites?: { meetings: string[]; programs: string[]; groups: string[] },
+  showExpired = false,
 ): Meeting[] {
   const programSet = filters.programs.length ? new Set(filters.programs) : null;
   const languageSet = filters.languages.length ? new Set(filters.languages) : null;
@@ -934,6 +964,7 @@ export function filterMeetings(
   const groupNames = wantText ? new Map(groups.map((g) => [g.id, g.name])) : null;
   const out: Meeting[] = [];
   for (const m of meetings) {
+    if (!showExpired && listExpired(m, now)) continue;
     const nextIso = filters.day ? nextOccurrence(m, now) : null;
     if (
       matchesFilters(m, filters, nextIso, zone, wantText
@@ -967,17 +998,19 @@ export function useVisibleMeetings() {
   const favoriteMeetingIds = useMeetingStore((s) => s.favoriteMeetingIds);
   const favoriteProgramIds = useMeetingStore((s) => s.favoriteProgramIds);
   const favoriteGroupIds = useMeetingStore((s) => s.favoriteGroupIds);
+  const showExpired = useMeetingStore((s) => s.showExpired);
+  const displayZone = useMeetingStore((s) => s.displayZone);
   return useMemo(() => {
     if (!hydrated) return [];
-    const zone = viewerZone();
     return filterMeetings(
       collectMeetings(custom, hiddenIds, showCatalog),
       filters,
       now,
-      zone,
+      shownZone(displayZone),
       [...BUILTIN_PROGRAMS, ...programs],
       groups,
       { meetings: favoriteMeetingIds, programs: favoriteProgramIds, groups: favoriteGroupIds },
+      showExpired,
     );
   }, [
     custom,
@@ -991,5 +1024,12 @@ export function useVisibleMeetings() {
     favoriteMeetingIds,
     favoriteProgramIds,
     favoriteGroupIds,
+    showExpired,
+    displayZone,
   ]);
+}
+
+export function useShownZone() {
+  const chosen = useMeetingStore((s) => s.displayZone);
+  return shownZone(chosen);
 }

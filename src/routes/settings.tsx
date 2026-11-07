@@ -29,6 +29,8 @@ function SettingsPage() {
   const setLocale = useMeetingStore((s) => s.setLocale);
   const alertFavorites = useMeetingStore((s) => s.alertFavorites);
   const setAlertFavorites = useMeetingStore((s) => s.setAlertFavorites);
+  const showExpired = useMeetingStore((s) => s.showExpired);
+  const setShowExpired = useMeetingStore((s) => s.setShowExpired);
   const setAlertsEnabled = useMeetingStore((s) => s.setAlertsEnabled);
   const dossiers = useMeetingStore((s) => s.dossiers);
   const setDossier = useMeetingStore((s) => s.setDossier);
@@ -69,6 +71,26 @@ function SettingsPage() {
                 onClick={() => setLocale(item.id)}
               />
             ))}
+          </div>
+        </section>
+        <section className="border border-[var(--color-border)] bg-[var(--color-card)] p-4">
+          <h2 className="text-xs font-semibold tracking-[0.16em] text-[var(--color-gold)] uppercase">Expired lists</h2>
+          <p className="mt-1 text-sm leading-relaxed text-[var(--color-fg-3)]">
+            Some lists were copied for one week or one dated directory. After that date they drop off. You can still look at them.
+          </p>
+          <div className="mt-3 grid gap-2">
+            <Choice
+              selected={!showExpired}
+              title="Hide expired lists"
+              detail="The current list only."
+              onClick={() => setShowExpired(false)}
+            />
+            <Choice
+              selected={showExpired}
+              title="Show expired lists"
+              detail="Older copies stay, marked expired."
+              onClick={() => setShowExpired(true)}
+            />
           </div>
         </section>
         <section className="border border-[var(--color-border)] bg-[var(--color-card)] p-4">
