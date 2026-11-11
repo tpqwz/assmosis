@@ -1,9 +1,14 @@
-const CACHE = "assmosis-shell-v5";
+const CACHE = "assmosis-shell-v6";
+const BASE = new URL("./", self.location).pathname;
+
+function rooted(path) {
+  return `${BASE}${path.replace(/^\//, "")}`;
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE).then((cache) =>
-      Promise.all(["/", "/favicon.png", "/icon-192.png", "/shell.wasm"].map((url) => cache.add(url).catch(() => undefined))),
+      Promise.all(["", "favicon.png", "icon-192.png", "shell.wasm"].map((path) => cache.add(rooted(path)).catch(() => undefined))),
     ),
   );
   self.skipWaiting();
@@ -23,9 +28,11 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-  if (url.pathname.startsWith("/api") || url.pathname.startsWith("/__grok")) return;
-  if (url.pathname.endsWith(".webmanifest") || url.pathname.endsWith("manifest.json")) return;
-  if (url.pathname === "/catalog/meetings.json") {
+  const root = BASE.replace(/\/$/, "");
+  const path = root && url.pathname.startsWith(root) ? url.pathname.slice(root.length) || "/" : url.pathname;
+  if (path.startsWith("/api") || path.startsWith("/__grok")) return;
+  if (path.endsWith(".webmanifest") || path.endsWith("manifest.json")) return;
+  if (path === "/catalog/meetings.json") {
     event.respondWith(
       caches.open(CACHE).then(async (cache) => {
         const hit = await cache.match(request);

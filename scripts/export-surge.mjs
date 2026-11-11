@@ -8,6 +8,8 @@ import { build } from "vite";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = join(root, "surge");
+const base = process.env.PAGES_BASE || "/";
+const prefix = base.endsWith("/") ? base : `${base}/`;
 
 const rustc = spawnSync(
   "rustc",
@@ -35,7 +37,7 @@ if (rustc.status !== 0) process.exit(rustc.status ?? 1);
 await build({
   configFile: false,
   root,
-  base: "/",
+  base: prefix,
   publicDir: "public",
   resolve: { tsconfigPaths: true },
   plugins: [tailwindcss()],
@@ -57,10 +59,10 @@ await build({
 
 function absolutize(html) {
   return html
-    .replaceAll('href="./assets/', 'href="/assets/')
-    .replaceAll('src="./assets/', 'src="/assets/')
-    .replaceAll('href="assets/', 'href="/assets/')
-    .replaceAll('src="assets/', 'src="/assets/');
+    .replaceAll('href="./assets/', `href="${prefix}assets/`)
+    .replaceAll('src="./assets/', `src="${prefix}assets/`)
+    .replaceAll('href="assets/', `href="${prefix}assets/`)
+    .replaceAll('src="assets/', `src="${prefix}assets/`);
 }
 
 function findBuiltHtml(dir) {
@@ -83,14 +85,14 @@ function findBuiltHtml(dir) {
 
 const builtPath = findBuiltHtml(outDir);
 let html = absolutize(readFileSync(builtPath, "utf8"));
-if (!html.includes('src="/assets/') && !html.includes('href="/assets/')) {
+if (!html.includes(`src="${prefix}assets/`) && !html.includes(`href="${prefix}assets/`)) {
   console.error("built html has no absolute /assets/ urls");
   process.exit(1);
 }
 const assetDir = join(outDir, "assets");
 const loadsWasm = readdirSync(assetDir).some((name) => {
   if (!name.endsWith(".js")) return false;
-  return readFileSync(join(assetDir, name), "utf8").includes("/shell.wasm");
+  return readFileSync(join(assetDir, name), "utf8").includes("shell.wasm");
 });
 if (!loadsWasm) {
   console.error("shell bundle does not load /shell.wasm");
@@ -100,6 +102,7 @@ writeFileSync(join(outDir, "index.html"), html);
 writeFileSync(join(outDir, "settings.html"), html);
 writeFileSync(join(outDir, "weekly.html"), html);
 writeFileSync(join(outDir, "200.html"), html);
+writeFileSync(join(outDir, "404.html"), html);
 
 const programs = readFileSync(join(root, "src/lib/meetings/programs.ts"), "utf8");
 const ids = [...programs.matchAll(/row\(\s*[^,\n]+,\s*"([^"]+)"/g)].map((match) => match[1]);

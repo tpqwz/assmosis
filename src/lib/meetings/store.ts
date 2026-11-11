@@ -64,7 +64,7 @@ function normalizeRow(m: CatalogRow): Meeting {
 export function loadCatalog(): Promise<void> {
   if (CATALOG.length) return Promise.resolve();
   if (typeof window === "undefined") return Promise.resolve();
-  catalogPromise ??= fetch(`/catalog/meetings.json?v=${CATALOG_VERSION}`)
+  catalogPromise ??= fetch(`${import.meta.env.BASE_URL}catalog/meetings.json?v=${CATALOG_VERSION}`)
     .then((response) => {
       if (!response.ok) throw new Error("catalog");
       return response.json() as Promise<CatalogRow[]>;

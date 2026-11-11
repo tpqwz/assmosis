@@ -72,9 +72,12 @@ test("a row links the list it was copied from, even when the note never names th
     meetingListSources(row("alanon", "From the Al-Anon Family Groups UK & Eire meeting finder, copied 11 November 2026.", "zoom", "afg-uk-scotland-daily--1"))[0]?.href,
     "https://al-anonuk.org.uk/groups/scotland-daily/",
   );
+  assert.equal(meetingListSources(row("alanon", "", "inperson", "afg-nz-kerikeri"))[0]?.href, "https://al-anon.org.nz/al-anon-meetings/");
+  assert.equal(meetingListSources(row("alanon", "", "inperson", "afg-si-ljubljana"))[0]?.href, "https://www.al-anon.si/srecanja/");
+  assert.equal(meetingListSources(row("na", "", "inperson", "na-si-ljubljana-1"))[0]?.href, "https://www.na-slovenija.org/");
   assert.match(meetingListSources(row("alanon", "", "zoom", "afg-30742056-3-1700"))[0].href, /electronic-meeting-page/);
   assert.equal(meetingListSources(row("itaa", "no calendar id")).length, 0);
-  assert.equal(programSourceLead("na"), "Meetings in this list came from");
+  assert.equal(programSourceLead("na"), "Meetings in this list came from one of these pages");
   assert.equal(programSourceLead("slaa"), "Meetings in this list came from one of these pages");
   assert.equal(programSourceLead("sia"), "Meetings in this list came from");
   assert.equal(programListSources("itaa").coverage, "all");

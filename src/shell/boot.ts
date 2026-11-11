@@ -11,8 +11,17 @@ type ShellExports = {
 
 const PATH_MAX = 256;
 
+function appPath(pathname: string) {
+  const prefix = import.meta.env.BASE_URL.replace(/\/$/, "");
+  if (!prefix) return pathname;
+  if (pathname === prefix) return "/";
+  if (pathname.startsWith(`${prefix}/`)) return pathname.slice(prefix.length);
+  return pathname;
+}
+
 async function paintFromWasm(pathname: string) {
-  const response = await fetch("/shell.wasm");
+  const base = import.meta.env.BASE_URL;
+  const response = await fetch(`${base}shell.wasm`);
   if (!response.ok) throw new Error("shell missing");
   const bytes = await response.arrayBuffer();
   const { instance } = await WebAssembly.instantiate(bytes, {});
@@ -35,7 +44,7 @@ async function paintFromWasm(pathname: string) {
 
 async function boot() {
   try {
-    await paintFromWasm(location.pathname);
+    await paintFromWasm(appPath(location.pathname));
   } catch (err) {
     console.error(err);
   }

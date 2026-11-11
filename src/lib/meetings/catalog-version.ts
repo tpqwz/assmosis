@@ -1,1 +1,1 @@
-export const CATALOG_VERSION = "9d53accfa55b";
+export const CATALOG_VERSION = "e26836d2162c";

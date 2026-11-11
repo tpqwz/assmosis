@@ -56,6 +56,22 @@ const ALANON_UK: ListSource = {
   href: "https://al-anonuk.org.uk/getting-help/find-a-meeting/",
   label: "Al-Anon UK & Eire meeting finder",
 };
+const ALANON_NZ: ListSource = {
+  href: "https://al-anon.org.nz/al-anon-meetings/",
+  label: "New Zealand Al-Anon meeting list",
+};
+const ALANON_SI: ListSource = {
+  href: "https://www.al-anon.si/srecanja/",
+  label: "Al-Anon Slovenia meeting list",
+};
+const NA_SI: ListSource = {
+  href: "https://www.na-slovenija.org/",
+  label: "Narcotics Anonymous Slovenia",
+};
+const OA_SI: ListSource = {
+  href: "https://oa.org/meetings/800346/",
+  label: "Overeaters Anonymous meeting 800346",
+};
 const NA_VIRTUAL: ListSource = {
   href: "https://virtual-na.org/meetings/",
   label: "Virtual NA meeting list",
@@ -159,9 +175,9 @@ const PROGRAMS: Record<string, ProgramSources> = {
   dda: { coverage: "all", sources: [DDA_OREGON, DDA_UK] },
   faa: { coverage: "all", sources: [FAA_VIRTUAL, FAA_PHONE] },
   coanon: { coverage: "all", sources: Object.values(COANON_PAGES) },
-  alanon: { coverage: "all", sources: [ALANON, ALANON_AU, ALANON_UK] },
-  alateen: { coverage: "all", sources: [ALANON, ALANON_AU] },
-  na: { coverage: "all", sources: [NA_VIRTUAL] },
+  alanon: { coverage: "all", sources: [ALANON, ALANON_AU, ALANON_UK, ALANON_NZ, ALANON_SI] },
+  alateen: { coverage: "all", sources: [ALANON, ALANON_AU, ALANON_NZ] },
+  na: { coverage: "all", sources: [NA_VIRTUAL, NA_SI] },
   aa: { coverage: "all", sources: [AA_AU, AA_NZ, AA_NY, AA_TO] },
   ea: { coverage: "some", sources: [EA_REMOTE] },
   aca: { coverage: "some", sources: [ACA_CAL] },
@@ -222,9 +238,14 @@ export function meetingListSources(meeting: Listed): ListSource[] {
         const slug = id.slice("afg-uk-".length).split("--")[0];
         return [{ href: `https://al-anonuk.org.uk/groups/${slug}/`, label: "Al-Anon UK & Eire meeting finder" }];
       }
+      if (id.startsWith("afg-nz-")) return [ALANON_NZ];
+      if (id.startsWith("afg-si-")) return [ALANON_SI];
       return id.startsWith("afg-") || /^\s*From the Al-Anon electronic meeting list/i.test(notes) ? [ALANON] : [];
     case "na":
+      if (id.startsWith("na-si-")) return [NA_SI];
       return id.startsWith("vna-") || /^\s*Virtual NA\b/i.test(notes) ? [NA_VIRTUAL] : [];
+    case "oa":
+      return id.startsWith("oa-si-") ? [OA_SI] : [];
     case "aa":
       if (id.startsWith("aa-au-") || id.startsWith("adl-") || /Adelaide AA|meetings\.aa\.org\.au/i.test(notes)) return [AA_AU];
       if (id.startsWith("aa-nz-")) return [AA_NZ];
