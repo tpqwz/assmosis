@@ -48,6 +48,14 @@ const ALANON: ListSource = {
   href: "https://meetings.al-anon.org/electronic-meeting-page/",
   label: "Al-Anon electronic meeting list",
 };
+const ALANON_AU: ListSource = {
+  href: "https://al-anon.org.au/meetings/",
+  label: "Al-Anon Australia meeting list",
+};
+const ALANON_UK: ListSource = {
+  href: "https://al-anonuk.org.uk/getting-help/find-a-meeting/",
+  label: "Al-Anon UK & Eire meeting finder",
+};
 const NA_VIRTUAL: ListSource = {
   href: "https://virtual-na.org/meetings/",
   label: "Virtual NA meeting list",
@@ -151,8 +159,8 @@ const PROGRAMS: Record<string, ProgramSources> = {
   dda: { coverage: "all", sources: [DDA_OREGON, DDA_UK] },
   faa: { coverage: "all", sources: [FAA_VIRTUAL, FAA_PHONE] },
   coanon: { coverage: "all", sources: Object.values(COANON_PAGES) },
-  alanon: { coverage: "all", sources: [ALANON] },
-  alateen: { coverage: "all", sources: [ALANON] },
+  alanon: { coverage: "all", sources: [ALANON, ALANON_AU, ALANON_UK] },
+  alateen: { coverage: "all", sources: [ALANON, ALANON_AU] },
   na: { coverage: "all", sources: [NA_VIRTUAL] },
   aa: { coverage: "all", sources: [AA_AU, AA_NZ, AA_NY, AA_TO] },
   ea: { coverage: "some", sources: [EA_REMOTE] },
@@ -206,6 +214,14 @@ export function meetingListSources(meeting: Listed): ListSource[] {
     }
     case "alanon":
     case "alateen":
+      if (id.startsWith("afg-au-")) {
+        const slug = id.slice("afg-au-".length);
+        return [{ href: `https://al-anon.org.au/meetings/${slug}/`, label: "Al-Anon Australia meeting list" }];
+      }
+      if (id.startsWith("afg-uk-")) {
+        const slug = id.slice("afg-uk-".length).split("--")[0];
+        return [{ href: `https://al-anonuk.org.uk/groups/${slug}/`, label: "Al-Anon UK & Eire meeting finder" }];
+      }
       return id.startsWith("afg-") || /^\s*From the Al-Anon electronic meeting list/i.test(notes) ? [ALANON] : [];
     case "na":
       return id.startsWith("vna-") || /^\s*Virtual NA\b/i.test(notes) ? [NA_VIRTUAL] : [];

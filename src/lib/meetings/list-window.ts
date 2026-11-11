@@ -98,7 +98,10 @@ export function listExpired(meeting: Row, now = Date.now()): boolean {
 export function copySentence(meeting: Row, now = Date.now()): string {
   if (meeting.source !== "catalog") return "";
   const window = listWindow(meeting);
-  if (!window) return NO_COPY_DATE;
+  if (!window) {
+    const copied = (meeting.notes || "").match(/\bcopied (\d{1,2} [A-Za-z]+ \d{4})\b/i);
+    return copied ? `Copied ${copied[1]}.` : NO_COPY_DATE;
+  }
   const copied = `Copied from ${window.label}.`;
   return windowPassed(window.through, now) ? `${copied} That date has passed.` : copied;
 }

@@ -22,10 +22,12 @@ export function AppHeader({ embedded = false }: { embedded?: boolean }) {
             className="flex h-11 w-12 items-center justify-center"
             onClick={() => setNavOpen(!navOpen)}
           >
-            <span className={`hamburger relative block h-5 w-8 ${navOpen ? "open" : ""}`}>
-              <span className="top" />
-              <span className="middle" />
-              <span className="bottom" />
+            <span className={`hamburger ${navOpen ? "open" : ""}`} aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="24" height="24">
+                <line className="top" x1="3" y1="6" x2="21" y2="6" />
+                <line className="middle" x1="3" y1="12" x2="21" y2="12" />
+                <line className="bottom" x1="3" y1="18" x2="21" y2="18" />
+              </svg>
             </span>
           </button>
 

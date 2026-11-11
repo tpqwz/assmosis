@@ -64,6 +64,15 @@ test("a row links the list it was copied from, even when the note never names th
   assert.equal(itaa[0]?.href, "https://internetaddictsanonymous.org/online-meetings/");
   assert.match(itaa[1]?.href, /teamup\.com\/ksahzu4xdr66wve679/);
   assert.equal(meetingListSources(row("sia", "", "zoom", "sia-davis-1"))[0]?.href, "https://siawso.org/meetings/");
+  assert.equal(
+    meetingListSources(row("alanon", "From the Al-Anon Australia meeting list, copied 11 November 2026.", "inperson", "afg-au-ipswich-2"))[0]?.href,
+    "https://al-anon.org.au/meetings/ipswich-2/",
+  );
+  assert.equal(
+    meetingListSources(row("alanon", "From the Al-Anon Family Groups UK & Eire meeting finder, copied 11 November 2026.", "zoom", "afg-uk-scotland-daily--1"))[0]?.href,
+    "https://al-anonuk.org.uk/groups/scotland-daily/",
+  );
+  assert.match(meetingListSources(row("alanon", "", "zoom", "afg-30742056-3-1700"))[0].href, /electronic-meeting-page/);
   assert.equal(meetingListSources(row("itaa", "no calendar id")).length, 0);
   assert.equal(programSourceLead("na"), "Meetings in this list came from");
   assert.equal(programSourceLead("slaa"), "Meetings in this list came from one of these pages");
@@ -104,6 +113,10 @@ test("dated copies expire after their window, and a meeting someone added does n
   assert.match(copySentence(row("slaa", "", "zoom", "slaa-1114-1"), Date.UTC(2026, 10, 7)), /Copied from the SLAA virtual intergroup calendar for November 7–14, 2026\.$/);
   assert.match(copySentence(row("slaa", "", "zoom", "slaa-virt-1"), Date.UTC(2026, 10, 7)), /October 19–26, 2026\. That date has passed\.$/);
   assert.equal(copySentence(row("arts")), "The day this row was copied was not saved.");
+  assert.equal(
+    copySentence(row("alanon", "From the Al-Anon Australia meeting list, copied 11 November 2026.", "inperson", "afg-au-ipswich-2")),
+    "Copied 11 November 2026.",
+  );
   assert.equal(copySentence({ ...row("arts"), source: "custom" }), "");
   assert.equal(missingPageSentence(row("aa", "AA online.")), "No public page was saved for this row.");
   assert.equal(missingPageSentence(row("aa", "", "zoom", "aa-ny-1")), "");

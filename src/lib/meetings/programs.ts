@@ -205,7 +205,6 @@ export function programById(programs: Program[], id: string): Program | undefine
 export const LIST_SCOPE: Record<string, string> = {
   aa: "Virtual meetings from Australia, New Zealand, Toronto, New York, and Adelaide. Not every AA meeting.",
   na: "The Virtual NA region. Not every in-person room.",
-  alanon: "Electronic meetings. Not every in-person group.",
   aca: "Online and telephone meetings from the ACA world calendar for November 7–14, 2026, plus meetings already saved. The November copy drops off after November 14. The October 19–26 copy has dropped off. Not every in-person group.",
   oa: "One Florida and Georgia intergroup. Not the Overeaters Anonymous list.",
   naranon: "Central California virtual meetings. Not the Nar-Anon list.",
